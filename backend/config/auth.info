@@ -1,0 +1,7 @@
+To get the authentication to work, create a file called auth.js in this directory.
+This file needs to export the following variables:
+
+const prismaSecret = 'secret';
+const appSecret = 'secret';
+
+module.exports = { prismaSecret, appSecret };

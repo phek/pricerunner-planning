@@ -1,0 +1,24 @@
+# import Option from "./prisma.graphql"
+
+type Query {
+  question: String!
+  options: [Option!]!
+}
+
+type Mutation {
+  post(description: String!): Option!
+  signup(email: String!, password: String!, name: String!): AuthPayload
+  login(email: String!, password: String!): AuthPayload
+}
+
+type AuthPayload {
+  token: String
+  user: User
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  options: [Option!]!
+}

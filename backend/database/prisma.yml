@@ -1,0 +1,6 @@
+endpoint: https://eu1.prisma.sh/philip-ekblom-aeae38/pricerunner-planning/dev
+datamodel: datamodel.graphql
+secret: pr44planning
+hooks:
+  post-deploy:
+    - graphql get-schema --project database
