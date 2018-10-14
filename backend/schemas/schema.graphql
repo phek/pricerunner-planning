@@ -1,12 +1,14 @@
 # import Option from "./prisma.graphql"
+# import Poll from "./prisma.graphql"
 
 type Query {
-  question: String!
-  options: [Option!]!
+  polls: [Poll!]
+  users: [User!]
 }
 
 type Mutation {
-  post(description: String!): Option!
+  addOption(pollID: ID!, description: String!): Option!
+  addPoll(question: String!): Poll!
   signup(email: String!, password: String!, name: String!): AuthPayload
   login(email: String!, password: String!): AuthPayload
 }
@@ -20,5 +22,6 @@ type User {
   id: ID!
   name: String!
   email: String!
+  polls: [Poll!]!
   options: [Option!]!
 }

@@ -1,5 +1,9 @@
-function options(root, args, context, info) {
-    return context.db.query.options({}, info);
+function polls(root, args, context, info) {
+    return context.db.query.polls({}, info);
 }
 
-module.exports = { options }
+function users(root, args, context, info) {
+    return context.db.query.users({}, info);
+}
+
+module.exports = { polls, users }

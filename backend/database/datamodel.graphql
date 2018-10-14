@@ -3,6 +3,7 @@ type User {
   name: String!
   email: String! @unique
   password: String!
+  polls: [Poll!]!
   options: [Option!]!
 }
 
@@ -10,5 +11,14 @@ type Option {
   id: ID! @unique
   createdAt: DateTime!
   description: String!
+  poll: Poll
+  postedBy: User
+}
+
+type Poll {
+  id: ID! @unique
+  createdAt: DateTime!
+  question: String!
+  options: [Option!]!
   postedBy: User
 }

@@ -1,7 +1,11 @@
 # source: https://eu1.prisma.sh/philip-ekblom-aeae38/pricerunner-planning/dev
-# timestamp: Sat Sep 22 2018 21:13:16 GMT+0200 (W. Europe Daylight Time)
+# timestamp: Sun Oct 14 2018 15:39:17 GMT+0200 (W. Europe Daylight Time)
 
 type AggregateOption {
+  count: Int!
+}
+
+type AggregatePoll {
   count: Int!
 }
 
@@ -25,16 +29,22 @@ scalar Long
 type Mutation {
   createUser(data: UserCreateInput!): User!
   createOption(data: OptionCreateInput!): Option!
+  createPoll(data: PollCreateInput!): Poll!
   updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   updateOption(data: OptionUpdateInput!, where: OptionWhereUniqueInput!): Option
+  updatePoll(data: PollUpdateInput!, where: PollWhereUniqueInput!): Poll
   deleteUser(where: UserWhereUniqueInput!): User
   deleteOption(where: OptionWhereUniqueInput!): Option
+  deletePoll(where: PollWhereUniqueInput!): Poll
   upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
   upsertOption(where: OptionWhereUniqueInput!, create: OptionCreateInput!, update: OptionUpdateInput!): Option!
+  upsertPoll(where: PollWhereUniqueInput!, create: PollCreateInput!, update: PollUpdateInput!): Poll!
   updateManyUsers(data: UserUpdateInput!, where: UserWhereInput): BatchPayload!
   updateManyOptions(data: OptionUpdateInput!, where: OptionWhereInput): BatchPayload!
+  updateManyPolls(data: PollUpdateInput!, where: PollWhereInput): BatchPayload!
   deleteManyUsers(where: UserWhereInput): BatchPayload!
   deleteManyOptions(where: OptionWhereInput): BatchPayload!
+  deleteManyPolls(where: PollWhereInput): BatchPayload!
 }
 
 enum MutationType {
@@ -53,7 +63,8 @@ type Option implements Node {
   id: ID!
   createdAt: DateTime!
   description: String!
-  postedBy(where: UserWhereInput): User
+  poll: Poll
+  postedBy: User
 }
 
 """A connection to a list of items."""
@@ -68,7 +79,13 @@ type OptionConnection {
 
 input OptionCreateInput {
   description: String!
+  poll: PollCreateOneWithoutOptionsInput
   postedBy: UserCreateOneWithoutOptionsInput
+}
+
+input OptionCreateManyWithoutPollInput {
+  create: [OptionCreateWithoutPollInput!]
+  connect: [OptionWhereUniqueInput!]
 }
 
 input OptionCreateManyWithoutPostedByInput {
@@ -76,8 +93,14 @@ input OptionCreateManyWithoutPostedByInput {
   connect: [OptionWhereUniqueInput!]
 }
 
+input OptionCreateWithoutPollInput {
+  description: String!
+  postedBy: UserCreateOneWithoutOptionsInput
+}
+
 input OptionCreateWithoutPostedByInput {
   description: String!
+  poll: PollCreateOneWithoutOptionsInput
 }
 
 """An edge in a connection."""
@@ -147,7 +170,17 @@ input OptionSubscriptionWhereInput {
 
 input OptionUpdateInput {
   description: String
+  poll: PollUpdateOneWithoutOptionsInput
   postedBy: UserUpdateOneWithoutOptionsInput
+}
+
+input OptionUpdateManyWithoutPollInput {
+  create: [OptionCreateWithoutPollInput!]
+  connect: [OptionWhereUniqueInput!]
+  disconnect: [OptionWhereUniqueInput!]
+  delete: [OptionWhereUniqueInput!]
+  update: [OptionUpdateWithWhereUniqueWithoutPollInput!]
+  upsert: [OptionUpsertWithWhereUniqueWithoutPollInput!]
 }
 
 input OptionUpdateManyWithoutPostedByInput {
@@ -159,13 +192,30 @@ input OptionUpdateManyWithoutPostedByInput {
   upsert: [OptionUpsertWithWhereUniqueWithoutPostedByInput!]
 }
 
+input OptionUpdateWithoutPollDataInput {
+  description: String
+  postedBy: UserUpdateOneWithoutOptionsInput
+}
+
 input OptionUpdateWithoutPostedByDataInput {
   description: String
+  poll: PollUpdateOneWithoutOptionsInput
+}
+
+input OptionUpdateWithWhereUniqueWithoutPollInput {
+  where: OptionWhereUniqueInput!
+  data: OptionUpdateWithoutPollDataInput!
 }
 
 input OptionUpdateWithWhereUniqueWithoutPostedByInput {
   where: OptionWhereUniqueInput!
   data: OptionUpdateWithoutPostedByDataInput!
+}
+
+input OptionUpsertWithWhereUniqueWithoutPollInput {
+  where: OptionWhereUniqueInput!
+  update: OptionUpdateWithoutPollDataInput!
+  create: OptionCreateWithoutPollInput!
 }
 
 input OptionUpsertWithWhereUniqueWithoutPostedByInput {
@@ -285,6 +335,7 @@ input OptionWhereInput {
 
   """All values not ending with the given string."""
   description_not_ends_with: String
+  poll: PollWhereInput
   postedBy: UserWhereInput
 }
 
@@ -307,13 +358,296 @@ type PageInfo {
   endCursor: String
 }
 
+type Poll implements Node {
+  id: ID!
+  createdAt: DateTime!
+  question: String!
+  options(where: OptionWhereInput, orderBy: OptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Option!]
+  postedBy: User
+}
+
+"""A connection to a list of items."""
+type PollConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PollEdge]!
+  aggregate: AggregatePoll!
+}
+
+input PollCreateInput {
+  question: String!
+  options: OptionCreateManyWithoutPollInput
+  postedBy: UserCreateOneWithoutPollsInput
+}
+
+input PollCreateManyWithoutPostedByInput {
+  create: [PollCreateWithoutPostedByInput!]
+  connect: [PollWhereUniqueInput!]
+}
+
+input PollCreateOneWithoutOptionsInput {
+  create: PollCreateWithoutOptionsInput
+  connect: PollWhereUniqueInput
+}
+
+input PollCreateWithoutOptionsInput {
+  question: String!
+  postedBy: UserCreateOneWithoutPollsInput
+}
+
+input PollCreateWithoutPostedByInput {
+  question: String!
+  options: OptionCreateManyWithoutPollInput
+}
+
+"""An edge in a connection."""
+type PollEdge {
+  """The item at the end of the edge."""
+  node: Poll!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum PollOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  question_ASC
+  question_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+}
+
+type PollPreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  question: String!
+}
+
+type PollSubscriptionPayload {
+  mutation: MutationType!
+  node: Poll
+  updatedFields: [String!]
+  previousValues: PollPreviousValues
+}
+
+input PollSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [PollSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [PollSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [PollSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: PollWhereInput
+}
+
+input PollUpdateInput {
+  question: String
+  options: OptionUpdateManyWithoutPollInput
+  postedBy: UserUpdateOneWithoutPollsInput
+}
+
+input PollUpdateManyWithoutPostedByInput {
+  create: [PollCreateWithoutPostedByInput!]
+  connect: [PollWhereUniqueInput!]
+  disconnect: [PollWhereUniqueInput!]
+  delete: [PollWhereUniqueInput!]
+  update: [PollUpdateWithWhereUniqueWithoutPostedByInput!]
+  upsert: [PollUpsertWithWhereUniqueWithoutPostedByInput!]
+}
+
+input PollUpdateOneWithoutOptionsInput {
+  create: PollCreateWithoutOptionsInput
+  connect: PollWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: PollUpdateWithoutOptionsDataInput
+  upsert: PollUpsertWithoutOptionsInput
+}
+
+input PollUpdateWithoutOptionsDataInput {
+  question: String
+  postedBy: UserUpdateOneWithoutPollsInput
+}
+
+input PollUpdateWithoutPostedByDataInput {
+  question: String
+  options: OptionUpdateManyWithoutPollInput
+}
+
+input PollUpdateWithWhereUniqueWithoutPostedByInput {
+  where: PollWhereUniqueInput!
+  data: PollUpdateWithoutPostedByDataInput!
+}
+
+input PollUpsertWithoutOptionsInput {
+  update: PollUpdateWithoutOptionsDataInput!
+  create: PollCreateWithoutOptionsInput!
+}
+
+input PollUpsertWithWhereUniqueWithoutPostedByInput {
+  where: PollWhereUniqueInput!
+  update: PollUpdateWithoutPostedByDataInput!
+  create: PollCreateWithoutPostedByInput!
+}
+
+input PollWhereInput {
+  """Logical AND on all given filters."""
+  AND: [PollWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [PollWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [PollWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  question: String
+
+  """All values that are not equal to given value."""
+  question_not: String
+
+  """All values that are contained in given list."""
+  question_in: [String!]
+
+  """All values that are not contained in given list."""
+  question_not_in: [String!]
+
+  """All values less than the given value."""
+  question_lt: String
+
+  """All values less than or equal the given value."""
+  question_lte: String
+
+  """All values greater than the given value."""
+  question_gt: String
+
+  """All values greater than or equal the given value."""
+  question_gte: String
+
+  """All values containing the given string."""
+  question_contains: String
+
+  """All values not containing the given string."""
+  question_not_contains: String
+
+  """All values starting with the given string."""
+  question_starts_with: String
+
+  """All values not starting with the given string."""
+  question_not_starts_with: String
+
+  """All values ending with the given string."""
+  question_ends_with: String
+
+  """All values not ending with the given string."""
+  question_not_ends_with: String
+  options_every: OptionWhereInput
+  options_some: OptionWhereInput
+  options_none: OptionWhereInput
+  postedBy: UserWhereInput
+}
+
+input PollWhereUniqueInput {
+  id: ID
+}
+
 type Query {
   users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
   options(where: OptionWhereInput, orderBy: OptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Option]!
+  polls(where: PollWhereInput, orderBy: PollOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Poll]!
   user(where: UserWhereUniqueInput!): User
   option(where: OptionWhereUniqueInput!): Option
+  poll(where: PollWhereUniqueInput!): Poll
   usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
   optionsConnection(where: OptionWhereInput, orderBy: OptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): OptionConnection!
+  pollsConnection(where: PollWhereInput, orderBy: PollOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PollConnection!
 
   """Fetches an object given its ID"""
   node(
@@ -325,6 +659,7 @@ type Query {
 type Subscription {
   user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
   option(where: OptionSubscriptionWhereInput): OptionSubscriptionPayload
+  poll(where: PollSubscriptionWhereInput): PollSubscriptionPayload
 }
 
 type User implements Node {
@@ -332,6 +667,7 @@ type User implements Node {
   name: String!
   email: String!
   password: String!
+  polls(where: PollWhereInput, orderBy: PollOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Poll!]
   options(where: OptionWhereInput, orderBy: OptionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Option!]
 }
 
@@ -349,6 +685,7 @@ input UserCreateInput {
   name: String!
   email: String!
   password: String!
+  polls: PollCreateManyWithoutPostedByInput
   options: OptionCreateManyWithoutPostedByInput
 }
 
@@ -357,10 +694,23 @@ input UserCreateOneWithoutOptionsInput {
   connect: UserWhereUniqueInput
 }
 
+input UserCreateOneWithoutPollsInput {
+  create: UserCreateWithoutPollsInput
+  connect: UserWhereUniqueInput
+}
+
 input UserCreateWithoutOptionsInput {
   name: String!
   email: String!
   password: String!
+  polls: PollCreateManyWithoutPostedByInput
+}
+
+input UserCreateWithoutPollsInput {
+  name: String!
+  email: String!
+  password: String!
+  options: OptionCreateManyWithoutPostedByInput
 }
 
 """An edge in a connection."""
@@ -437,6 +787,7 @@ input UserUpdateInput {
   name: String
   email: String
   password: String
+  polls: PollUpdateManyWithoutPostedByInput
   options: OptionUpdateManyWithoutPostedByInput
 }
 
@@ -449,15 +800,37 @@ input UserUpdateOneWithoutOptionsInput {
   upsert: UserUpsertWithoutOptionsInput
 }
 
+input UserUpdateOneWithoutPollsInput {
+  create: UserCreateWithoutPollsInput
+  connect: UserWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: UserUpdateWithoutPollsDataInput
+  upsert: UserUpsertWithoutPollsInput
+}
+
 input UserUpdateWithoutOptionsDataInput {
   name: String
   email: String
   password: String
+  polls: PollUpdateManyWithoutPostedByInput
+}
+
+input UserUpdateWithoutPollsDataInput {
+  name: String
+  email: String
+  password: String
+  options: OptionUpdateManyWithoutPostedByInput
 }
 
 input UserUpsertWithoutOptionsInput {
   update: UserUpdateWithoutOptionsDataInput!
   create: UserCreateWithoutOptionsInput!
+}
+
+input UserUpsertWithoutPollsInput {
+  update: UserUpdateWithoutPollsDataInput!
+  create: UserCreateWithoutPollsInput!
 }
 
 input UserWhereInput {
@@ -629,6 +1002,9 @@ input UserWhereInput {
 
   """All values not ending with the given string."""
   password_not_ends_with: String
+  polls_every: PollWhereInput
+  polls_some: PollWhereInput
+  polls_none: PollWhereInput
   options_every: OptionWhereInput
   options_some: OptionWhereInput
   options_none: OptionWhereInput
