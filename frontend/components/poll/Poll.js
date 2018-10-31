@@ -1,49 +1,31 @@
-import React, { Component } from 'react'
-import { Query } from 'react-apollo'
+import React, { Fragment } from 'react'
+import { Mutation } from 'react-apollo'
 import gql from 'graphql-tag'
 import Option from './option/Option'
 
-class Poll extends Component {
-    render() {
-        const POLL_QUERY = gql`
-            {
-                polls {
-                    question
-                    options {
-                        id
-                        description
-                    }
-                }
+const Poll = ({ id, question, options }) => {
+    const OPTION_MUTATION = gql`
+        mutation OptionMutation($pollID: ID!, $description: String!) {
+            addOption(pollID: $pollID, description: $description) {
+                id
+                description
+                createdAt
             }
-        `
-        const polls = [
-            {
-                id: '1',
-                description: 'Yes',
-            },
-            {
-                id: '2',
-                description: 'No',
-            },
-        ]
+        }
+`
 
-        return (
-            <Query query={POLL_QUERY}>
-                {({ loading, error, data }) => {
-                    if (loading) return <div>Fetching</div>
-                    if (error) return <div>{error.toString()}</div>
+    return (
+        <Fragment>
+            <Mutation mutation={OPTION_MUTATION} variables={{ pollID: id, description: "Maybe" }}>
+                {optionMutation => <button onClick={optionMutation}>Submit</button>}
+            </Mutation>
 
-                    const optionsToRender = data.options
-
-                    return (
-                        <div>
-                            {optionsToRender.map(option => <Option key={option.id} option={option} />)}
-                        </div>
-                    )
-                }}
-            </Query>
-        )
-    }
-}
+            <div>
+                <h1>{question}</h1>
+                {options.map((option, index) => <Option key={index} option={option} />)}
+            </div>
+        </Fragment>
+    )
+};
 
 export default Poll
